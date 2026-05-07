@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "nx": {
+    "tags": ["scope:e2e"],
     "implicitDependencies": [
       "@conways-game-of-life/web"
     ]

@@ -1,0 +1,5 @@
+{
+  "name": "api-client",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "tags": ["scope:api-client"]
+}

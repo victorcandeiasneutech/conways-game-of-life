@@ -15,11 +15,6 @@
       "default": "./dist/index.js"
     }
   },
-  "nx": {
-    "tags": [
-      "scope:sim"
-    ]
-  },
   "dependencies": {
     "tslib": "^2.3.0"
   }

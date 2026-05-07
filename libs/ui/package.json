@@ -11,9 +11,4 @@
     },
     "./package.json": "./package.json"
   },
-  "nx": {
-    "tags": [
-      "scope:ui"
-    ]
-  }
 }

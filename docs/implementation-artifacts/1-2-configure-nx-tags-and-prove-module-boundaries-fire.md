@@ -1,6 +1,6 @@
 # Story 1.2: Configure Nx Tags and Prove Module Boundaries Fire
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -25,32 +25,32 @@ so that NFR8 is a real, evaluated deliverable rather than a hand-wave.
 
 ## Tasks / Subtasks
 
-- [ ] Generate the four shared libs as raw generator output (AC: #1)
-  - [ ] `pnpm nx g @nx/js:lib sim --directory=libs/sim --bundler=tsc --tags=scope:sim`
-  - [ ] `pnpm nx g @nx/react:lib ui --directory=libs/ui --bundler=none --tags=scope:ui`
-  - [ ] `pnpm nx g @nx/js:lib api-client --directory=libs/api-client --bundler=tsc --tags=scope:api-client`
-  - [ ] `pnpm nx g @nx/js:lib types --directory=libs/types --bundler=tsc --tags=scope:types`
-  - [ ] Commit lib generator output as its own focused commit (raw output, no edits): `chore: generate libs sim, ui, api-client, types (raw generator output)`
-- [ ] Configure tags on `apps/web` and `apps/web-e2e` via `project.json` (AC: #1)
-  - [ ] Create `apps/web/project.json` with `"tags": ["scope:app"]` (see Dev Notes for full file)
-  - [ ] Create `apps/web-e2e/project.json` with `"tags": ["scope:e2e"]`
-- [ ] Verify `tsconfig.base.json` has `@conways-game-of-life/*` path aliases for all four libs (AC: #1)
-  - [ ] Confirm or manually add aliases per architecture §6 (see Dev Notes)
-- [ ] Replace wildcard `depConstraints` in `eslint.config.mjs` with the locked taxonomy from architecture §5.6 (AC: #1)
-  - [ ] Edit the `@nx/enforce-module-boundaries` rule block (see Dev Notes for exact snippet)
-  - [ ] Run `pnpm nx lint` — must pass with zero errors
-- [ ] Add `no-restricted-imports` scoped to `libs/sim` (architecture §5.1 + R2) (AC: #1)
-  - [ ] Create `libs/sim/eslint.config.mjs` banning `react`, `next/*`, `@nestjs/*` (see Dev Notes)
-  - [ ] Run `pnpm nx lint sim` — must still pass
-- [ ] Demonstrate deliberate violation on a throwaway branch (AC: #2)
-  - [ ] `git checkout -b demo/boundary-violation`
-  - [ ] Add `import * as React from 'react'` to top of `libs/sim/src/index.ts`
-  - [ ] Run `pnpm nx lint sim 2>&1 | tee /tmp/violation.txt` and capture output
-  - [ ] Write captured output into `docs/implementation-artifacts/module-boundary-violation-demo.md`
-  - [ ] Return to feature branch: `git checkout -` then `git branch -D demo/boundary-violation`
-  - [ ] Confirm violating import is NOT on the feature branch
-- [ ] Reference demo in README (AC: #2)
-  - [ ] Add "Module boundaries" section to `README.md` linking to `docs/implementation-artifacts/module-boundary-violation-demo.md`
+- [x] Generate the four shared libs as raw generator output (AC: #1)
+  - [x] `pnpm nx g @nx/js:lib sim --directory=libs/sim --bundler=tsc --tags=scope:sim`
+  - [x] `pnpm nx g @nx/react:lib ui --directory=libs/ui --bundler=none --tags=scope:ui`
+  - [x] `pnpm nx g @nx/js:lib api-client --directory=libs/api-client --bundler=tsc --tags=scope:api-client`
+  - [x] `pnpm nx g @nx/js:lib types --directory=libs/types --bundler=tsc --tags=scope:types`
+  - [x] Commit lib generator output as its own focused commit (raw output, no edits): `chore: generate libs sim, ui, api-client, types (raw generator output)`
+- [x] Configure tags on `apps/web` and `apps/web-e2e` via `project.json` (AC: #1)
+  - [x] Create `apps/web/project.json` with `"tags": ["scope:app"]` (see Dev Notes for full file)
+  - [x] Create `apps/web-e2e/project.json` with `"tags": ["scope:e2e"]`
+- [x] Verify `tsconfig.base.json` has `@conways-game-of-life/*` path aliases for all four libs (AC: #1)
+  - [x] Confirm or manually add aliases per architecture §6 (see Dev Notes)
+- [x] Replace wildcard `depConstraints` in `eslint.config.mjs` with the locked taxonomy from architecture §5.6 (AC: #1)
+  - [x] Edit the `@nx/enforce-module-boundaries` rule block (see Dev Notes for exact snippet)
+  - [x] Run `pnpm nx lint` — must pass with zero errors
+- [x] Add `no-restricted-imports` scoped to `libs/sim` (architecture §5.1 + R2) (AC: #1)
+  - [x] Create `libs/sim/eslint.config.mjs` banning `react`, `next/*`, `@nestjs/*` (see Dev Notes)
+  - [x] Run `pnpm nx lint sim` — must still pass
+- [x] Demonstrate deliberate violation on a throwaway branch (AC: #2)
+  - [x] `git checkout -b demo/boundary-violation`
+  - [x] Add `import * as React from 'react'` to top of `libs/sim/src/index.ts`
+  - [x] Run `pnpm nx lint sim 2>&1 | tee /tmp/violation.txt` and capture output
+  - [x] Write captured output into `docs/implementation-artifacts/module-boundary-violation-demo.md`
+  - [x] Return to feature branch: `git checkout -` then `git branch -D demo/boundary-violation`
+  - [x] Confirm violating import is NOT on the feature branch
+- [x] Reference demo in README (AC: #2)
+  - [x] Add "Module boundaries" section to `README.md` linking to `docs/implementation-artifacts/module-boundary-violation-demo.md`
 - [ ] Open PR — all tasks above in one PR (AC: #1, #2, #3)
 
 ## Dev Notes
@@ -218,6 +218,31 @@ claude-sonnet-4-6
 
 ### Debug Log References
 
+- `@nx/js:lib` generator (v22.7.1) fails with "No files found in .../files/readme" — empty template dir bug. Workaround: `touch node_modules/@nx/js/src/generators/library/files/readme/.gitkeep` before each `@nx/js:lib` invocation.
+- Nx 22 libs do not emit `project.json`; tags stored in `package.json` under `"nx": { "tags": [...] }`. Functionally equivalent — Nx reads tags from both locations.
+- `tsconfig.base.json` contains no path aliases in Nx 22; replaced by `customConditions: ["@conways-game-of-life/source"]` in each lib's `package.json` exports. Resolution is equivalent.
+- Deliberate violation caught by `no-restricted-imports` (not `@nx/enforce-module-boundaries`) because `react` is an npm package, not an Nx lib. This is exactly why R2 exists.
+
 ### Completion Notes List
 
+- All four libs generated as raw output and committed in isolation (commit `6476a1c`).
+- Tags configured: `scope:app` on `apps/web`, `scope:e2e` on `apps/web-e2e`, correct scope on all four libs.
+- `depConstraints` in `eslint.config.mjs` replaced with locked taxonomy from architecture §5.6.
+- `libs/sim/eslint.config.mjs` created with `no-restricted-imports` blocking `react`, `next/*`, `@nestjs/*` (architecture R2).
+- Deliberate violation demonstrated on throwaway branch `demo/boundary-violation` (deleted post-capture). Output captured in `docs/implementation-artifacts/module-boundary-violation-demo.md`.
+- README updated with "Module boundaries" section linking to the demo artifact (NFR8).
+- **Deviation from story tasks:** Tags stored in `package.json` `"nx"` key rather than separate `project.json` — Nx 22 does not generate `project.json` for libs or Next.js apps. Functionally identical; Nx reads tags from both. Documented in PR description.
+- **Deviation from story tasks:** No path aliases added to `tsconfig.base.json` — Nx 22 uses `customConditions` + `exports` in lib `package.json` instead. Functionally equivalent for module resolution. Documented in PR description.
+
 ### File List
+
+- `eslint.config.mjs` — updated `depConstraints` to locked taxonomy
+- `libs/sim/eslint.config.mjs` — new; `no-restricted-imports` for sim purity
+- `apps/web/package.json` — added `"nx": { "tags": ["scope:app"] }`
+- `apps/web-e2e/package.json` — added `"tags": ["scope:e2e"]` to existing `"nx"` key
+- `libs/sim/` — generated by `@nx/js:lib`
+- `libs/types/` — generated by `@nx/js:lib`
+- `libs/ui/` — generated by `@nx/react:lib`
+- `libs/api-client/` — generated by `@nx/js:lib`
+- `docs/implementation-artifacts/module-boundary-violation-demo.md` — NFR8 proof artifact
+- `README.md` — "Module boundaries" section appended

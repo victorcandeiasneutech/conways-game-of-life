@@ -165,6 +165,12 @@ Epics 5–8 in `docs/planning-artifacts/epics.md` define stretch tiers: pattern 
 
 **Stretch goals do not affect your evaluation.** Skipping all of them does not lower your score. Doing them does not compensate for gaps in core deliverables. They exist for engineers who finish the core work and want to play.
 
+## Module boundaries
+
+Nx tag taxonomy and `@nx/enforce-module-boundaries` are configured per architecture §5.6. A deliberate violation was demonstrated to prove the rule fires in CI — see [`docs/implementation-artifacts/module-boundary-violation-demo.md`](docs/implementation-artifacts/module-boundary-violation-demo.md).
+
+The `libs/sim` library has an additional `no-restricted-imports` rule (per architecture R2) that blocks React, Next.js, and NestJS imports at the ESLint level — catching external npm packages that the tag rule alone cannot stop.
+
 ## Questions
 
 Reply to Interviewer. We respond within one business day.

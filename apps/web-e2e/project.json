@@ -1,0 +1,6 @@
+{
+  "name": "web-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "tags": ["scope:e2e"],
+  "implicitDependencies": ["web"]
+}

@@ -16,6 +16,12 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "es2022",
-    "customConditions": ["@conways-game-of-life/source"]
+    "customConditions": ["@conways-game-of-life/source"],
+    "paths": {
+      "@conways-game-of-life/sim":        ["libs/sim/src/index.ts"],
+      "@conways-game-of-life/ui":         ["libs/ui/src/index.ts"],
+      "@conways-game-of-life/api-client": ["libs/api-client/src/index.ts"],
+      "@conways-game-of-life/types":      ["libs/types/src/index.ts"]
+    }
   }
 }

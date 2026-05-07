@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 1, "column": 0}, "map": {"version":3,"sources":["file:///Users/victor/Desktop/conways-temp/apps/web/src/app/page.module.css"],"sourcesContent":[".page {\n}\n"],"names":[],"mappings":""}}]
+}

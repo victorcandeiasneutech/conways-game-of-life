@@ -1,6 +1,6 @@
 # Story 1.3: CI Workflow — Lint and Type-Check on Every PR
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -25,14 +25,14 @@ so that style and TypeScript regressions cannot merge and the checks are individ
 
 ## Tasks / Subtasks
 
-- [ ] Replace scaffold `ci.yml` with architecture-compliant multi-job structure (AC: #1, #3)
-  - [ ] Set `on: pull_request: branches: [main]` trigger (PRs into main only)
-  - [ ] Add shared `install` steps factored into each job (or a reusable `setup` pattern)
-  - [ ] Add `lint` job: `pnpm install --frozen-lockfile` → `pnpm nx affected -t lint --base=origin/main`
-  - [ ] Add `typecheck` job: `pnpm install --frozen-lockfile` → `pnpm nx affected -t typecheck --base=origin/main`
-  - [ ] Remove `nx fix-ci` step (Nx Cloud feature, not applicable here)
-  - [ ] Remove Playwright install from shared setup (belongs in the `e2e` job, story 1.5)
-- [ ] Verify `fetch-depth: 0` on `actions/checkout` so `nx affected` can compute the merge base (AC: #1)
+- [x] Replace scaffold `ci.yml` with architecture-compliant multi-job structure (AC: #1, #3)
+  - [x] Set `on: pull_request: branches: [main]` trigger (PRs into main only)
+  - [x] Add shared `install` steps factored into each job (or a reusable `setup` pattern)
+  - [x] Add `lint` job: `pnpm install --frozen-lockfile` → `pnpm nx affected -t lint --base=origin/main`
+  - [x] Add `typecheck` job: `pnpm install --frozen-lockfile` → `pnpm nx affected -t typecheck --base=origin/main`
+  - [x] Remove `nx fix-ci` step (Nx Cloud feature, not applicable here)
+  - [x] Remove Playwright install from shared setup (belongs in the `e2e` job, story 1.5)
+- [x] Verify `fetch-depth: 0` on `actions/checkout` so `nx affected` can compute the merge base (AC: #1)
 - [ ] Open PR and confirm both `lint` and `typecheck` checks appear in the PR's checks tab (AC: #1, #2)
 
 ## Dev Notes
@@ -137,6 +137,20 @@ claude-sonnet-4-6
 
 ### Debug Log References
 
+- Scaffold `ci.yml` had 12 structural issues relative to architecture §4.10: single flat job, `nx run-many` instead of `affected`, no per-job naming, Playwright install unconditionally, `nx fix-ci` Nx Cloud step, trigger not scoped to PRs into `main`. All corrected.
+- `pyyaml` not available on system; validated YAML structure via Node.js script checking all 12 required properties.
+
 ### Completion Notes List
 
+- `ci.yml` replaced: single `main` job → separate `lint` and `typecheck` jobs.
+- Trigger changed from `push: branches: [main]` + bare `pull_request` → `pull_request: branches: [main]`.
+- Both jobs use `pnpm nx affected -t {lint|typecheck} --base=origin/main`.
+- `fetch-depth: 0` added to both jobs' checkout steps.
+- Removed `nx fix-ci` (Nx Cloud integration, out of scope).
+- Removed unconditional `playwright install` (belongs in `e2e` job, story 1.5).
+- `pnpm nx affected -t lint --base=main` passes for 6 projects locally.
+- `test` and `e2e` jobs are absent — intentional; added in stories 1.4 and 1.5.
+
 ### File List
+
+- `.github/workflows/ci.yml` — replaced scaffold single-job with `lint` + `typecheck` jobs (architecture §4.10)

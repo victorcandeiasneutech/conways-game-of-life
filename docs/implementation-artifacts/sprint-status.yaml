@@ -35,17 +35,17 @@ tracking_system: file-system
 story_location: /Users/arnoe/workspace-designpickle/conways-game-of-life/docs/implementation-artifacts
 
 development_status:
-  epic-1: in-progress
+  epic-1: done
   1-1-initial-nx-scaffolding-committed-untouched: done
   1-2-configure-nx-tags-and-prove-module-boundaries-fire: done
   1-3-ci-workflow-lint-and-type-check-on-every-pr: done
   1-4-ci-workflow-jest-unit-tests-on-every-pr: done
   1-5-ci-workflow-playwright-e2e-on-every-pr: done
-  1-6-branch-protection-and-auto-approve-workflow: in-progress
-  epic-1-retrospective: optional
+  1-6-branch-protection-and-auto-approve-workflow: done
+  epic-1-retrospective: done
 
-  epic-2: backlog
-  2-1-grid-types-and-primitives-with-tests: backlog
+  epic-2: in-progress
+  2-1-grid-types-and-primitives-with-tests: ready-for-dev
   2-2-conway-rules-engine-step-with-rule-by-rule-tests: backlog
   2-3-edge-case-and-boundary-tests-for-step: backlog
   2-4-randomize-with-injectable-rng-and-tests: backlog

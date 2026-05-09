@@ -1,6 +1,6 @@
 # Story 1.4: CI Workflow — Jest Unit Tests on Every PR
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -21,10 +21,10 @@ so that simulation rule regressions cannot merge undetected.
 
 ## Tasks / Subtasks
 
-- [ ] Add `test` job to `.github/workflows/ci.yml` (AC: #1)
-  - [ ] Follow the same job shape as `lint` and `typecheck` (checkout, pnpm setup, node setup, install, nx command)
-  - [ ] Run `pnpm nx affected -t test --base=origin/main --parallel=3`
-  - [ ] Confirm job is a separate named check (not merged into `lint` or `typecheck`)
+- [x] Add `test` job to `.github/workflows/ci.yml` (AC: #1)
+  - [x] Follow the same job shape as `lint` and `typecheck` (checkout, pnpm setup, node setup, install, nx command)
+  - [x] Run `pnpm nx affected -t test --base=origin/main --parallel=3`
+  - [x] Confirm job is a separate named check (not merged into `lint` or `typecheck`)
 - [ ] Open PR and confirm `test` check appears in the PR's checks tab (AC: #1, #2)
 
 ## Dev Notes
@@ -90,6 +90,16 @@ claude-sonnet-4-6
 
 ### Debug Log References
 
+- `libs/sim` has no `test` target (no `--unitTestRunner=jest` on `@nx/js:lib` generator). Jest config for sim lands in story 2.1. The `test` CI job will pick it up automatically at that point.
+- `apps/web` already has a `test` target with `jest.config.cts` from the Next.js preset.
+
 ### Completion Notes List
 
+- Added `test` job to `.github/workflows/ci.yml` following the same shape as `lint` and `typecheck`.
+- Runs `pnpm nx affected -t test --base=origin/main --parallel=3` as specified in architecture §7.2.
+- All 3 jobs (`lint`, `typecheck`, `test`) now present; `e2e` arrives in story 1.5.
+- Local `pnpm nx affected -t lint --base=main` still passes (6 projects).
+
 ### File List
+
+- `.github/workflows/ci.yml` — added `test` job (architecture §4.10 Job 3)

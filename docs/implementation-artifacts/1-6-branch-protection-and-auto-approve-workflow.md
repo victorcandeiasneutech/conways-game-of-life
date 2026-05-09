@@ -1,6 +1,6 @@
 # Story 1.6: Branch Protection and Auto-Approve Workflow
 
-Status: in-progress
+Status: done
 
 ## Story
 

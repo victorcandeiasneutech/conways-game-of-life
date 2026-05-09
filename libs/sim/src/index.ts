@@ -1,1 +1,1 @@
-export * from './lib/sim.js';
+export * from './lib/grid.js';

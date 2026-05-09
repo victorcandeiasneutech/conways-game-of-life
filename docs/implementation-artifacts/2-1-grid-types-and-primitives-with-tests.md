@@ -1,6 +1,6 @@
 # Story 2.1: Grid types and primitives with tests
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -25,22 +25,22 @@ so that the rules engine has a stable, allocation-controlled, framework-free dat
 
 ## Tasks / Subtasks
 
-- [ ] Add Jest configuration to `libs/sim` (AC: #2)
-  - [ ] Create `libs/sim/jest.config.ts` using `jest.preset.js` and `ts-jest` transform, `testEnvironment: 'node'`
-  - [ ] Create `libs/sim/tsconfig.spec.json` extending `tsconfig.base.json` with `types: ["jest", "node"]`, including `src/**/*.spec.ts`
-  - [ ] Update `libs/sim/tsconfig.json` to add `{ "path": "./tsconfig.spec.json" }` to `references`
-- [ ] Define `Grid` interface in `libs/types` (AC: #1)
-  - [ ] Create `libs/types/src/lib/grid.ts` exporting `Grid` interface: `{ readonly width: number; readonly height: number; readonly cells: Uint8Array }`
-  - [ ] Update `libs/types/src/index.ts` to add `export * from './lib/grid.js'` (nodenext `.js` extension required)
-- [ ] Implement pure grid helpers in `libs/sim` (AC: #1)
-  - [ ] Create `libs/sim/src/lib/grid.ts` with `createGrid`, `cloneGrid`, `getCell`, `setCell`, `toggleCell`, `clearGrid` — all pure (return new `Grid`, never mutate)
-  - [ ] Update `libs/sim/src/index.ts` to export from `'./lib/grid.js'` (replace scaffold `'./lib/sim.js'` export)
-- [ ] Write Jest specs co-located with source (AC: #2)
-  - [ ] Create `libs/sim/src/lib/grid.spec.ts` asserting all ACs in criterion 2 plus: `getCell` returns `0` for out-of-bounds x and y; `setCell(g, x, y, 0)` kills a live cell; `createGrid` throws `RangeError` on non-positive dimensions
-- [ ] Verify CI targets pass (AC: #2, #3)
-  - [ ] `pnpm nx test sim` green locally
-  - [ ] `pnpm nx lint sim` green (no cross-boundary imports)
-  - [ ] `pnpm nx typecheck sim` green
+- [x] Add Jest configuration to `libs/sim` (AC: #2)
+  - [x] Create `libs/sim/jest.config.ts` using `jest.preset.js` and `ts-jest` transform, `testEnvironment: 'node'`
+  - [x] Create `libs/sim/tsconfig.spec.json` extending `tsconfig.base.json` with `types: ["jest", "node"]`, including `src/**/*.spec.ts`
+  - [x] Update `libs/sim/tsconfig.json` to add `{ "path": "./tsconfig.spec.json" }` to `references`
+- [x] Define `Grid` interface in `libs/types` (AC: #1)
+  - [x] Create `libs/types/src/lib/grid.ts` exporting `Grid` interface: `{ readonly width: number; readonly height: number; readonly cells: Uint8Array }`
+  - [x] Update `libs/types/src/index.ts` to add `export * from './lib/grid.js'` (nodenext `.js` extension required)
+- [x] Implement pure grid helpers in `libs/sim` (AC: #1)
+  - [x] Create `libs/sim/src/lib/grid.ts` with `createGrid`, `cloneGrid`, `getCell`, `setCell`, `toggleCell`, `clearGrid` — all pure (return new `Grid`, never mutate)
+  - [x] Update `libs/sim/src/index.ts` to export from `'./lib/grid.js'` (replace scaffold `'./lib/sim.js'` export)
+- [x] Write Jest specs co-located with source (AC: #2)
+  - [x] Create `libs/sim/src/lib/grid.spec.ts` asserting all ACs in criterion 2 plus: `getCell` returns `0` for out-of-bounds x and y; `setCell(g, x, y, 0)` kills a live cell; `createGrid` throws `RangeError` on non-positive dimensions
+- [x] Verify CI targets pass (AC: #2, #3)
+  - [x] `pnpm nx test sim` green locally
+  - [x] `pnpm nx lint sim` green (no cross-boundary imports)
+  - [x] `pnpm nx typecheck sim` green
 
 ## Dev Notes
 
@@ -258,6 +258,28 @@ claude-sonnet-4-6
 
 ### Debug Log References
 
+- `tsconfig.lib.json` was including `*.spec.ts` files via `src/**/*.ts`, causing TS2835 (missing `.js` extension) and TS2593 (missing jest types). Fixed by adding `"exclude": ["src/**/*.spec.ts", "src/**/*.test.ts"]` to `tsconfig.lib.json`.
+- `tsconfig.spec.json` initially referenced `tsconfig.json`, causing TS6202 (circular project reference). Fixed by changing the reference to `tsconfig.lib.json`.
+- `nx sync` ran automatically to add `../types/tsconfig.lib.json` reference to `libs/sim/tsconfig.lib.json` (dependency on `libs/types`).
+
 ### Completion Notes List
 
+- Added Jest config (`jest.config.ts`, `tsconfig.spec.json`) to `libs/sim`; `@nx/jest/plugin` auto-injects `test` target.
+- Defined `Grid` interface in `libs/types/src/lib/grid.ts`; replaced scaffold barrel in `libs/types/src/index.ts`.
+- Implemented 6 pure grid helpers in `libs/sim/src/lib/grid.ts` — all return new `Grid`, never mutate input.
+- Wrote 24 Jest specs covering createGrid (4), cloneGrid (2), getCell (6), setCell (4), toggleCell (3), clearGrid (2), immutability (3).
+- Deleted scaffold `libs/sim/src/lib/sim.ts`; replaced barrel with `grid.js` export.
+- `pnpm nx test sim`: 24/24 passing. `pnpm nx lint sim`: clean. `pnpm nx typecheck sim`: clean. No regressions in affected projects.
+
 ### File List
+
+- `libs/types/src/lib/grid.ts` — new; `Grid` interface definition
+- `libs/types/src/index.ts` — modified; replaced scaffold export with `grid.js`
+- `libs/sim/src/lib/grid.ts` — new; pure helper implementations
+- `libs/sim/src/lib/grid.spec.ts` — new; 24 Jest tests
+- `libs/sim/src/lib/sim.ts` — deleted; scaffold placeholder
+- `libs/sim/src/index.ts` — modified; replaced scaffold barrel with `grid.js`
+- `libs/sim/jest.config.ts` — new; ts-jest config, activates `test` target
+- `libs/sim/tsconfig.spec.json` — new; TypeScript config for Jest specs
+- `libs/sim/tsconfig.json` — modified; added `tsconfig.spec.json` reference
+- `libs/sim/tsconfig.lib.json` — modified; added exclude for spec files, nx sync added `types` reference

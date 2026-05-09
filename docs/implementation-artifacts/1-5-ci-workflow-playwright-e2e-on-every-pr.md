@@ -1,6 +1,6 @@
 # Story 1.5: CI Workflow — Playwright E2E on Every PR
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -21,10 +21,10 @@ so that E2E regressions cannot merge and failures are diagnosable without a loca
 
 ## Tasks / Subtasks
 
-- [ ] Add `e2e` job to `.github/workflows/ci.yml` (AC: #1)
-  - [ ] Install browser binaries: `pnpm exec playwright install --with-deps`
-  - [ ] Run: `pnpm nx affected -t e2e --base=origin/main`
-  - [ ] Upload Playwright report as artifact on failure using `actions/upload-artifact@v4`
+- [x] Add `e2e` job to `.github/workflows/ci.yml` (AC: #1)
+  - [x] Install browser binaries: `pnpm exec playwright install --with-deps`
+  - [x] Run: `pnpm nx affected -t e2e --base=origin/main`
+  - [x] Upload Playwright report as artifact on failure using `actions/upload-artifact@v4`
 - [ ] Open PR and confirm `e2e` check appears in the PR's checks tab (AC: #1, #2)
 
 ## Dev Notes
@@ -110,6 +110,17 @@ claude-sonnet-4-6
 
 ### Debug Log References
 
+- `example.spec.ts` left in place — tests "Welcome" text that currently exists in scaffold page. Will be deleted in story 3.1 when real app UI replaces scaffold content.
+- Used `pnpm nx affected -t e2e --base=origin/main` (not `pnpm nx e2e web-e2e`) so job only fires on PRs affecting `apps/web` or `apps/web-e2e` — consistent with architecture §7.2 intent.
+
 ### Completion Notes List
 
+- Added `e2e` job to `.github/workflows/ci.yml` — all four required CI jobs now present (`lint`, `typecheck`, `test`, `e2e`).
+- Playwright browsers installed via `pnpm exec playwright install --with-deps`.
+- `actions/upload-artifact@v4` uploads `apps/web-e2e/playwright-report/` on failure with 7-day retention.
+- All 10 structural validation checks passed locally.
+- `pnpm nx affected -t lint --base=main` still passes (served from cache, 6 projects).
+
 ### File List
+
+- `.github/workflows/ci.yml` — added `e2e` job (architecture §4.10 Job 4; all four jobs now complete)

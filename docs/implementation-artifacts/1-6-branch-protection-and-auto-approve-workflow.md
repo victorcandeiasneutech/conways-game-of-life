@@ -1,6 +1,6 @@
 # Story 1.6: Branch Protection and Auto-Approve Workflow
 
-Status: ready-for-dev
+Status: in-progress
 
 ## Story
 
@@ -25,17 +25,17 @@ so that AR2 (branch protection) and AR3 (auto-approve) are demonstrably satisfie
 
 ## Tasks / Subtasks
 
-- [ ] Author `.github/workflows/auto-approve.yml` (AC: #2)
-  - [ ] Trigger on `pull_request` into `main`
-  - [ ] Grant `pull-requests: write` permission
-  - [ ] Use `hmarr/auto-approve-action@v4` with `GITHUB_TOKEN`
+- [x] Author `.github/workflows/auto-approve.yml` (AC: #2)
+  - [x] Trigger on `pull_request` into `main`
+  - [x] Grant `pull-requests: write` permission
+  - [x] Use `hmarr/auto-approve-action@v4` with `GITHUB_TOKEN`
 - [ ] Configure branch protection on `main` via GitHub repository settings (AC: #1)
   - [ ] Require pull request before merging (no direct pushes)
   - [ ] Require 1 approving review
   - [ ] Require status checks: `lint`, `typecheck`, `test`, `e2e`
   - [ ] Require branches to be up to date before merging
   - [ ] Block force pushes
-- [ ] Document the branch protection settings in `docs/implementation-artifacts/branch-protection-settings.md` (AC: #1)
+- [x] Document the branch protection settings in `docs/implementation-artifacts/branch-protection-settings.md` (AC: #1)
 - [ ] Open PR and confirm: auto-approve fires, all 4 checks appear as required, PR is mergeable only when all are green (AC: #2, #3)
 
 ## Dev Notes
@@ -108,6 +108,15 @@ claude-sonnet-4-6
 
 ### Debug Log References
 
+- Branch protection configuration (Task 2) requires GitHub UI — cannot be automated from CLI. Settings documented in `branch-protection-settings.md`; must be applied manually via Settings → Branches → Add rule before the PR confirmation task (Task 4) can be completed.
+- `auto-approve.yml` uses `pull_request` trigger (not `pull_request_target`) — correct for this use case; `GITHUB_TOKEN` has sufficient permissions with `pull-requests: write`.
+
 ### Completion Notes List
 
+- Created `.github/workflows/auto-approve.yml` — triggers on `pull_request` into `main`, grants `pull-requests: write`, uses `hmarr/auto-approve-action@v4` with `GITHUB_TOKEN`.
+- Created `docs/implementation-artifacts/branch-protection-settings.md` — documents all required branch protection settings matching architecture §4.10.
+
 ### File List
+
+- `.github/workflows/auto-approve.yml` — new; auto-approve workflow (AC: #2, #3)
+- `docs/implementation-artifacts/branch-protection-settings.md` — new; branch protection settings documentation (AC: #1)

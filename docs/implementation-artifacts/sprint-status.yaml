@@ -45,8 +45,8 @@ development_status:
   epic-1-retrospective: done
 
   epic-2: in-progress
-  2-1-grid-types-and-primitives-with-tests: review
-  2-2-conway-rules-engine-step-with-rule-by-rule-tests: backlog
+  2-1-grid-types-and-primitives-with-tests: done
+  2-2-conway-rules-engine-step-with-rule-by-rule-tests: review
   2-3-edge-case-and-boundary-tests-for-step: backlog
   2-4-randomize-with-injectable-rng-and-tests: backlog
   epic-2-retrospective: optional

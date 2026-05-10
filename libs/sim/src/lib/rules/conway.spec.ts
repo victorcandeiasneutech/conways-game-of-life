@@ -152,6 +152,34 @@ describe('step — immutability', () => {
   });
 });
 
+describe('step — edge cases', () => {
+  it('empty grid stays empty', () => {
+    const g = createGrid(5, 5);
+    expect(Array.from(step(g).cells)).toEqual(Array(25).fill(0));
+  });
+
+  it('all-alive 3×3: only the four corners survive', () => {
+    let g = createGrid(3, 3);
+    for (let y = 0; y < 3; y++)
+      for (let x = 0; x < 3; x++)
+        g = setCell(g, x, y, 1);
+    const result = step(g);
+    // corners have 3 live neighbors → survive; edges have 5, center has 8 → all die
+    expect(getLiveCells(result)).toEqual([[0, 0], [2, 0], [0, 2], [2, 2]]);
+  });
+
+  it('corner cell (0,0) with no other live cells dies', () => {
+    const g = setCell(createGrid(5, 5), 0, 0, 1);
+    expect(getCell(step(g), 0, 0)).toBe(0);
+  });
+
+  it('1×1 live cell dies (no neighbors possible)', () => {
+    let g = createGrid(1, 1);
+    g = setCell(g, 0, 0, 1);
+    expect(getCell(step(g), 0, 0)).toBe(0);
+  });
+});
+
 describe('conwayRules', () => {
   it('exposes the correct id and name', () => {
     expect(conwayRules.id).toBe('conway');

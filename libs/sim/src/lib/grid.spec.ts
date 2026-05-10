@@ -5,6 +5,7 @@ import {
   setCell,
   toggleCell,
   clearGrid,
+  randomizeGrid,
 } from './grid';
 
 describe('createGrid', () => {
@@ -161,6 +162,49 @@ describe('immutability', () => {
     const original = setCell(createGrid(3, 3), 1, 1, 1);
     const snapshot = Array.from(original.cells);
     clearGrid(original);
+    expect(Array.from(original.cells)).toEqual(snapshot);
+  });
+});
+
+// Tiny seeded PRNG (mulberry32) for deterministic tests — no external dep needed.
+function mulberry32(seed: number): () => number {
+  let s = seed;
+  return () => {
+    s |= 0; s = s + 0x6d2b79f5 | 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = t + Math.imul(t ^ (t >>> 7), 61 | t) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+describe('randomizeGrid', () => {
+  it('density=0 produces an all-dead grid', () => {
+    const g = randomizeGrid(createGrid(10, 10), 0);
+    expect(Array.from(g.cells)).toEqual(Array(100).fill(0));
+  });
+
+  it('density=1 produces an all-alive grid', () => {
+    const g = randomizeGrid(createGrid(10, 10), 1);
+    expect(Array.from(g.cells)).toEqual(Array(100).fill(1));
+  });
+
+  it('two calls with the same seeded RNG produce byte-identical grids', () => {
+    const g1 = randomizeGrid(createGrid(100, 100), 0.3, mulberry32(42));
+    const g2 = randomizeGrid(createGrid(100, 100), 0.3, mulberry32(42));
+    expect(Array.from(g1.cells)).toEqual(Array.from(g2.cells));
+  });
+
+  it('density ≈ 0.3 — live-cell ratio within ±5% on a 10 000-cell grid', () => {
+    const g = randomizeGrid(createGrid(100, 100), 0.3, mulberry32(99));
+    const alive = Array.from(g.cells).filter(c => c === 1).length;
+    expect(alive / g.cells.length).toBeGreaterThanOrEqual(0.25);
+    expect(alive / g.cells.length).toBeLessThanOrEqual(0.35);
+  });
+
+  it('never mutates the input grid', () => {
+    const original = createGrid(5, 5);
+    const snapshot = Array.from(original.cells);
+    randomizeGrid(original, 0.5, mulberry32(7));
     expect(Array.from(original.cells)).toEqual(snapshot);
   });
 });

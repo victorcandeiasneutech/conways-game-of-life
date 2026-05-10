@@ -17,7 +17,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@conways-game-of-life/sim": ["../../libs/sim/src/index.ts"],
+      "@conways-game-of-life/types": ["../../libs/types/src/index.ts"]
     },
     "types": ["jest", "node"],
     "outDir": "dist",
@@ -46,5 +48,13 @@
     "eslint.config.js",
     "eslint.config.cjs",
     "eslint.config.mjs"
+  ],
+  "references": [
+    {
+      "path": "../../libs/types"
+    },
+    {
+      "path": "../../libs/sim"
+    }
   ]
 }

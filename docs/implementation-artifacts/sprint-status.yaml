@@ -53,8 +53,8 @@ development_status:
 
   epic-3: in-progress
   3-1-page-shell-canvas-size-form-and-responsive-layout: done
-  3-2-canvas-render-and-click-tap-to-toggle-cells: review
-  3-3-play-pause-step-controls-and-generation-counter: backlog
+  3-2-canvas-render-and-click-tap-to-toggle-cells: done
+  3-3-play-pause-step-controls-and-generation-counter: review
   3-4-clear-and-randomize-controls: backlog
   3-5-speed-slider-with-raf-accumulator-mid-run-change-without-restart: backlog
   epic-3-retrospective: optional

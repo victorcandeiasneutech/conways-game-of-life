@@ -76,14 +76,14 @@ development_status:
   6-2-render-via-offscreencanvas-from-the-worker: done
   epic-6-retrospective: done
 
-  epic-7: in-progress
+  epic-7: done
   7-1-nestjs-apps-api-with-in-memory-pattern-repository: done
   7-2-libs-api-client-typed-wrapper: done
   7-3-save-and-load-ui-in-the-web-app: done
   7-4-sqlite-repository-via-prisma-full-stretch-upgrade: done
   epic-7-retrospective: done
 
-  epic-8: backlog
-  8-1-ruleset-interface-and-highlife-implementation-with-tests: backlog
+  epic-8: in-progress
+  8-1-ruleset-interface-and-highlife-implementation-with-tests: review
   8-2-rule-set-selector-in-the-web-app: backlog
   epic-8-retrospective: optional

@@ -5,7 +5,6 @@ import type { Grid } from '@conways-game-of-life/types';
 import GridSizeForm from './components/GridSizeForm';
 
 const CELL_PX = 12;
-const DEFAULT_GEN_PER_SEC = 10;
 
 type State = { grid: Grid; genCount: number };
 type Action =
@@ -71,6 +70,7 @@ export default function Page() {
     genCount: 0,
   }));
   const [running, setRunning] = useState(false);
+  const [genPerSec, setGenPerSec] = useState(10);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gridRef = useRef(grid);
   gridRef.current = grid;
@@ -79,7 +79,7 @@ export default function Page() {
     dispatch({ type: 'tick', next: step(gridRef.current) });
   }, []);
 
-  useSimulationLoop({ running, genPerSec: DEFAULT_GEN_PER_SEC, step: handleTick });
+  useSimulationLoop({ running, genPerSec, step: handleTick });
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -164,6 +164,21 @@ export default function Page() {
           >
             Randomize
           </button>
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-sm text-neutral-400">
+            Speed: <span className="text-white font-mono">{genPerSec}</span> gen/sec
+          </label>
+          <input
+            type="range"
+            min={1}
+            max={60}
+            step={1}
+            value={genPerSec}
+            onChange={(e) => setGenPerSec(Number(e.target.value))}
+            aria-label="Speed (gen/sec)"
+            className="w-full accent-cyan-400"
+          />
         </div>
         <GridSizeForm
           currentWidth={grid.width}

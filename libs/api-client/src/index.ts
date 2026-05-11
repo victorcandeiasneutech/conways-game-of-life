@@ -1,1 +1,1 @@
-export * from './lib/patterns.js';
+export * from './lib/patterns';

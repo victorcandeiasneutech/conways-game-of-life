@@ -1,6 +1,6 @@
 # Story 8.1: `RuleSet` interface and HighLife implementation with tests
 
-Status: done
+Status: review
 
 ## Story
 

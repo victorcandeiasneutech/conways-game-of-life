@@ -18,7 +18,7 @@ jobs:
           fetch-depth: 0
       - uses: pnpm/action-setup@v4
         with:
-          version: 9.8.0
+          version: 10
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -34,7 +34,7 @@ jobs:
           fetch-depth: 0
       - uses: pnpm/action-setup@v4
         with:
-          version: 9.8.0
+          version: 10
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -50,12 +50,13 @@ jobs:
           fetch-depth: 0
       - uses: pnpm/action-setup@v4
         with:
-          version: 9.8.0
+          version: 10
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
+      - run: pnpm prisma generate --schema apps/api/prisma/schema.prisma
       - run: pnpm nx affected -t test --base=origin/main --parallel=3
 
   e2e:
@@ -66,7 +67,7 @@ jobs:
           fetch-depth: 0
       - uses: pnpm/action-setup@v4
         with:
-          version: 9.8.0
+          version: 10
       - uses: actions/setup-node@v4
         with:
           node-version: 20

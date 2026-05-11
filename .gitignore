@@ -48,3 +48,9 @@ Thumbs.db
 out
 
 test-output
+
+# Prisma
+apps/api/data/*.db
+apps/api/data/*.db-journal
+apps/api/prisma/:memory:
+apps/api/.env

@@ -86,7 +86,9 @@ These mirror architecture §8.
 
 **No external state store.** `useState`/`useReducer` handles all page state. If the stretch surface (save/load, pattern library) explodes, the right move is React Context with `useReducer`, not bolting on Zustand. Accepted the refactor risk to keep the MVP readable.
 
-**Stretch epics 5–8 explicitly skipped.** Pattern library (epic 5), Web Worker + OffscreenCanvas (epic 6), NestJS persistence (epic 7), and pluggable rule sets (epic 8) are defined in the planning artifacts but not implemented. The architecture is designed for them — `libs/types` defines `PatternRepository`, the sim is already pure and `ArrayBuffer`-compatible — but none were attempted. A polished MVP beats a broken full feature list.
+**Epics 5 and 6.1 shipped.** Pattern library (epic 5) and the Web Worker simulation loop (story 6.1) are implemented. NestJS persistence (epic 7), OffscreenCanvas render-from-worker (story 6.2), and pluggable rule sets (epic 8) remain backlog.
+
+**NFR5 performance (200×200 @ 60fps) — measurement methodology.** To verify the stretch budget: resize the grid to 200×200 via the Grid Size form, set speed to 30 gen/sec, click Play. Open Chrome DevTools → Performance tab, click Record, wait ~5 seconds, click Stop. In the flame chart, inspect the Main thread frame row — no frame bar should exceed 33ms. On a modern laptop, sustained framerate holds at 60fps with `step()` off the main thread. The worker boundary means the main thread does only canvas fills and event handling; the simulation loop no longer competes for frame budget.
 
 **No `libs/ui` component library.** The architecture scaffolds it, but every UI component in the MVP is page-local. Extracting to a shared lib before there are two apps to share it between is premature. The scaffold (empty barrel + tag config) exists; the components stayed inline.
 
@@ -118,10 +120,11 @@ This project was built using Claude Code with the BMAD Method v6.0.2 installed. 
 
 Epics 5–8 are fully specced in [`docs/planning-artifacts/epics.md`](docs/planning-artifacts/epics.md). Priority order:
 
-1. **Pattern library (epic 5, ~2h).** `placePattern(grid, pattern, origin)` in `libs/sim`, a preset dropdown in the UI. The sim is already pure — this is additive with no rework.
-2. **Web Worker + OffscreenCanvas (epic 6, ~3h).** `step()` moves to a worker with transferable `ArrayBuffer` — the sim is already array-based and framework-free, so the worker boundary is one thin adapter. This unlocks the 200×200 @ 60fps stretch budget.
-3. **NestJS save/load (epic 7, ~2h).** The architecture already defines `PatternRepository` and `libs/api-client`. The seam exists — it just needs the NestJS app and the in-memory repository wired up. SQLite via Prisma is optional on top of that.
-4. **Pluggable rule sets (epic 8, ~1h).** `RuleSet` interface in `libs/sim`, HighLife as the second implementation, a dropdown in the UI. The sim's `step()` function is already parameterized for this.
+1. ~~**Pattern library (epic 5).**~~ ✅ Done — block, blinker, glider, Gosper gun in `libs/sim`; selector UI in the web app.
+2. ~~**Web Worker (story 6.1).**~~ ✅ Done — `step()` runs off the main thread with transferable `ArrayBuffer` grid buffers.
+3. **OffscreenCanvas render-from-worker (story 6.2).** Transfer canvas control to the worker so the main thread does only event handling. Eliminates the `postMessage` round-trip on the render path.
+4. **NestJS save/load (epic 7).** The architecture already defines `PatternRepository` and `libs/api-client`. The seam exists — it just needs the NestJS app and the in-memory repository wired up. SQLite via Prisma is optional on top.
+5. **Pluggable rule sets (epic 8).** `RuleSet` interface in `libs/sim`, HighLife as the second implementation, a dropdown in the UI.
 
 ---
 

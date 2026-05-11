@@ -1,0 +1,18 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "emitDeclarationOnly": false,
+    "lib": ["webworker", "esnext"],
+    "moduleResolution": "bundler",
+    "baseUrl": "../../../../",
+    "paths": {
+      "@conways-game-of-life/sim": ["libs/sim/src/index.ts"],
+      "@conways-game-of-life/types": ["libs/types/src/index.ts"]
+    }
+  },
+  "include": ["./**/*.ts"],
+  "exclude": ["node_modules"]
+}

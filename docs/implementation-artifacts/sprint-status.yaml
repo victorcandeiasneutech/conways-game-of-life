@@ -85,5 +85,5 @@ development_status:
 
   epic-8: in-progress
   8-1-ruleset-interface-and-highlife-implementation-with-tests: done
-  8-2-rule-set-selector-in-the-web-app: backlog
+  8-2-rule-set-selector-in-the-web-app: review
   epic-8-retrospective: optional

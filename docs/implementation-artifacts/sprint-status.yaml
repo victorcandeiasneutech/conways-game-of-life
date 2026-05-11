@@ -71,10 +71,10 @@ development_status:
   5-2-pattern-selector-ui-in-the-web-app: done
   epic-5-retrospective: done
 
-  epic-6: in-progress
+  epic-6: done
   6-1-move-step-into-a-web-worker-with-transferable-grid-buffers: done
-  6-2-render-via-offscreencanvas-from-the-worker: review
-  epic-6-retrospective: optional
+  6-2-render-via-offscreencanvas-from-the-worker: done
+  epic-6-retrospective: done
 
   epic-7: backlog
   7-1-nestjs-apps-api-with-in-memory-pattern-repository: backlog

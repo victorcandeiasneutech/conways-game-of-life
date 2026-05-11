@@ -1,6 +1,6 @@
 'use client';
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
-import { createGrid, step, toggleCell } from '@conways-game-of-life/sim';
+import { clearGrid, createGrid, randomizeGrid, step, toggleCell } from '@conways-game-of-life/sim';
 import type { Grid } from '@conways-game-of-life/types';
 import GridSizeForm from './components/GridSizeForm';
 
@@ -11,7 +11,9 @@ type State = { grid: Grid; genCount: number };
 type Action =
   | { type: 'resize'; w: number; h: number }
   | { type: 'tick'; next: Grid }
-  | { type: 'toggle'; x: number; y: number };
+  | { type: 'toggle'; x: number; y: number }
+  | { type: 'clear' }
+  | { type: 'randomize' };
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
@@ -21,6 +23,10 @@ function reducer(state: State, action: Action): State {
       return { grid: action.next, genCount: state.genCount + 1 };
     case 'toggle':
       return { ...state, grid: toggleCell(state.grid, action.x, action.y) };
+    case 'clear':
+      return { grid: clearGrid(state.grid), genCount: 0 };
+    case 'randomize':
+      return { grid: randomizeGrid(state.grid), genCount: 0 };
   }
 }
 
@@ -102,6 +108,16 @@ export default function Page() {
     dispatch({ type: 'tick', next: step(grid) });
   }
 
+  function handleClear() {
+    setRunning(false);
+    dispatch({ type: 'clear' });
+  }
+
+  function handleRandomize() {
+    setRunning(false);
+    dispatch({ type: 'randomize' });
+  }
+
   function handleCanvasPointerDown(e: React.PointerEvent<HTMLCanvasElement>) {
     if (running) return;
     const rect = e.currentTarget.getBoundingClientRect();
@@ -133,6 +149,20 @@ export default function Page() {
             className="rounded px-3 py-1.5 text-sm font-medium bg-neutral-700 hover:bg-neutral-600 text-white disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Step
+          </button>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={handleClear}
+            className="flex-1 rounded px-3 py-1.5 text-sm font-medium bg-neutral-700 hover:bg-neutral-600 text-white"
+          >
+            Clear
+          </button>
+          <button
+            onClick={handleRandomize}
+            className="flex-1 rounded px-3 py-1.5 text-sm font-medium bg-neutral-700 hover:bg-neutral-600 text-white"
+          >
+            Randomize
           </button>
         </div>
         <GridSizeForm

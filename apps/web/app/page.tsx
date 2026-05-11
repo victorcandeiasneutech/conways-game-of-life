@@ -37,6 +37,7 @@ function useSimulationLoop(opts: {
   genPerSec: number;
   gridRef: { current: Grid };
   onGrid: (next: Grid) => void;
+  workerRef: { current: Worker | null };
 }) {
   const rafRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number>(0);
@@ -48,24 +49,18 @@ function useSimulationLoop(opts: {
   runningRef.current = opts.running;
   const onGridRef = useRef(opts.onGrid);
   onGridRef.current = opts.onGrid;
-  const workerRef = useRef<Worker | null>(null);
 
+  // Wire up onmessage when workerRef changes (set once after worker is created)
   useEffect(() => {
-    const worker = new Worker(
-      new URL('./workers/sim.worker.ts', import.meta.url),
-    );
+    const worker = opts.workerRef.current;
+    if (!worker) return;
     worker.onmessage = (e: MessageEvent<{ type: string; buffer: ArrayBuffer; width: number; height: number }>) => {
       pendingRef.current = false;
       if (!runningRef.current) return;
       const { buffer, width, height } = e.data;
       onGridRef.current({ width, height, cells: new Uint8Array(buffer) });
     };
-    workerRef.current = worker;
-    return () => {
-      worker.terminate();
-      workerRef.current = null;
-    };
-  }, []);
+  }, [opts.workerRef]);
 
   useEffect(() => {
     if (!opts.running) {
@@ -81,11 +76,11 @@ function useSimulationLoop(opts: {
       accumulatorRef.current += dt;
       const tickInterval = 1000 / genPerSecRef.current;
       while (accumulatorRef.current >= tickInterval) {
-        if (!pendingRef.current && workerRef.current) {
+        if (!pendingRef.current && opts.workerRef.current) {
           pendingRef.current = true;
           const grid = opts.gridRef.current;
           const buffer = grid.cells.buffer.slice(0);
-          workerRef.current.postMessage(
+          opts.workerRef.current.postMessage(
             { type: 'tick', buffer, width: grid.width, height: grid.height },
             [buffer],
           );
@@ -121,29 +116,41 @@ export default function Page() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gridRef = useRef(grid);
   gridRef.current = grid;
+  const workerRef = useRef<Worker | null>(null);
+
+  // Worker lifecycle + OffscreenCanvas transfer (once on mount)
+  useEffect(() => {
+    const worker = new Worker(
+      new URL('./workers/sim.worker.ts', import.meta.url),
+    );
+    workerRef.current = worker;
+
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const offscreen = canvas.transferControlToOffscreen();
+      worker.postMessage({ type: 'init', canvas: offscreen, cellPx: CELL_PX }, [offscreen]);
+    }
+
+    return () => {
+      worker.terminate();
+      workerRef.current = null;
+    };
+  }, []);
+
+  // Non-tick renders: send grid to worker for drawing when paused
+  useEffect(() => {
+    if (running) return;
+    const worker = workerRef.current;
+    if (!worker) return;
+    const buffer = grid.cells.buffer.slice(0);
+    worker.postMessage({ type: 'render', buffer, width: grid.width, height: grid.height }, [buffer]);
+  }, [grid, running]);
 
   const handleGrid = useCallback((next: Grid) => {
     dispatch({ type: 'tick', next });
   }, []);
 
-  useSimulationLoop({ running, genPerSec, gridRef, onGrid: handleGrid });
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    ctx.fillStyle = '#0a0a0a';
-    ctx.fillRect(0, 0, grid.width * CELL_PX, grid.height * CELL_PX);
-    ctx.fillStyle = '#22d3ee';
-    for (let y = 0; y < grid.height; y++) {
-      for (let x = 0; x < grid.width; x++) {
-        if (grid.cells[y * grid.width + x] === 1) {
-          ctx.fillRect(x * CELL_PX, y * CELL_PX, CELL_PX, CELL_PX);
-        }
-      }
-    }
-  }, [grid]);
+  useSimulationLoop({ running, genPerSec, gridRef, onGrid: handleGrid, workerRef });
 
   function handleResize(w: number, h: number) {
     if (running) setRunning(false);

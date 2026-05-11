@@ -86,9 +86,11 @@ These mirror architecture §8.
 
 **No external state store.** `useState`/`useReducer` handles all page state. If the stretch surface (save/load, pattern library) explodes, the right move is React Context with `useReducer`, not bolting on Zustand. Accepted the refactor risk to keep the MVP readable.
 
-**Epics 5 and 6.1 shipped.** Pattern library (epic 5) and the Web Worker simulation loop (story 6.1) are implemented. NestJS persistence (epic 7), OffscreenCanvas render-from-worker (story 6.2), and pluggable rule sets (epic 8) remain backlog.
+**Epics 5 and 6 shipped.** Pattern library (epic 5), Web Worker simulation (story 6.1), and OffscreenCanvas render-from-worker (story 6.2) are all implemented. NestJS persistence (epic 7) and pluggable rule sets (epic 8) remain backlog.
 
-**NFR5 performance (200×200 @ 60fps) — measurement methodology.** To verify the stretch budget: resize the grid to 200×200 via the Grid Size form, set speed to 30 gen/sec, click Play. Open Chrome DevTools → Performance tab, click Record, wait ~5 seconds, click Stop. In the flame chart, inspect the Main thread frame row — no frame bar should exceed 33ms. On a modern laptop, sustained framerate holds at 60fps with `step()` off the main thread. The worker boundary means the main thread does only canvas fills and event handling; the simulation loop no longer competes for frame budget.
+**NFR5 performance (200×200 @ 60fps) — measurement methodology.** To verify the stretch budget: resize the grid to 200×200 via the Grid Size form, set speed to 30 gen/sec, click Play. Open Chrome DevTools → Performance tab, click Record, wait ~5 seconds, click Stop. In the flame chart, inspect the Main thread frame row — no frame bar should exceed 33ms. On a modern laptop, sustained framerate holds at 60fps.
+
+**NFR5 before/after (OffscreenCanvas, story 6.2).** After story 6.1, the Main thread flame chart still showed `fillRect` blocks inside the `useEffect([grid])` callback on every tick — canvas rendering competed with React reconciliation for main-thread budget. After story 6.2, the Main thread shows only the rAF accumulator loop and a `postMessage` call per tick; all `fillRect` work moves to the Worker thread. The main thread is now dominated by event handling and React state updates, not rendering.
 
 **No `libs/ui` component library.** The architecture scaffolds it, but every UI component in the MVP is page-local. Extracting to a shared lib before there are two apps to share it between is premature. The scaffold (empty barrel + tag config) exists; the components stayed inline.
 
@@ -122,7 +124,7 @@ Epics 5–8 are fully specced in [`docs/planning-artifacts/epics.md`](docs/plann
 
 1. ~~**Pattern library (epic 5).**~~ ✅ Done — block, blinker, glider, Gosper gun in `libs/sim`; selector UI in the web app.
 2. ~~**Web Worker (story 6.1).**~~ ✅ Done — `step()` runs off the main thread with transferable `ArrayBuffer` grid buffers.
-3. **OffscreenCanvas render-from-worker (story 6.2).** Transfer canvas control to the worker so the main thread does only event handling. Eliminates the `postMessage` round-trip on the render path.
+3. ~~**OffscreenCanvas render-from-worker (story 6.2).**~~ ✅ Done — worker owns the `OffscreenCanvas`; main thread does only event handling and React state.
 4. **NestJS save/load (epic 7).** The architecture already defines `PatternRepository` and `libs/api-client`. The seam exists — it just needs the NestJS app and the in-memory repository wired up. SQLite via Prisma is optional on top.
 5. **Pluggable rule sets (epic 8).** `RuleSet` interface in `libs/sim`, HighLife as the second implementation, a dropdown in the UI.
 

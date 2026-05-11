@@ -1,6 +1,6 @@
 # Story 6.1: Move `step()` into a Web Worker with transferable grid buffers
 
-Status: review
+Status: done
 
 ## Story
 

@@ -6,3 +6,19 @@ class MockWorker {
 }
 
 Object.defineProperty(globalThis, 'Worker', { value: MockWorker, writable: true });
+
+class MockOffscreenCanvas {
+  width: number;
+  height: number;
+  constructor(w: number, h: number) {
+    this.width = w;
+    this.height = h;
+  }
+  getContext(): null {
+    return null;
+  }
+}
+
+HTMLCanvasElement.prototype.transferControlToOffscreen = function () {
+  return new MockOffscreenCanvas(this.width, this.height) as unknown as OffscreenCanvas;
+};

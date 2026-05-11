@@ -35,27 +35,61 @@ function reducer(state: State, action: Action): State {
 function useSimulationLoop(opts: {
   running: boolean;
   genPerSec: number;
-  step: () => void;
+  gridRef: { current: Grid };
+  onGrid: (next: Grid) => void;
 }) {
   const rafRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number>(0);
   const accumulatorRef = useRef<number>(0);
   const genPerSecRef = useRef(opts.genPerSec);
   genPerSecRef.current = opts.genPerSec;
-  const stepRef = useRef(opts.step);
-  stepRef.current = opts.step;
+  const pendingRef = useRef(false);
+  const runningRef = useRef(opts.running);
+  runningRef.current = opts.running;
+  const onGridRef = useRef(opts.onGrid);
+  onGridRef.current = opts.onGrid;
+  const workerRef = useRef<Worker | null>(null);
 
   useEffect(() => {
-    if (!opts.running) return;
+    const worker = new Worker(
+      new URL('./workers/sim.worker.ts', import.meta.url),
+    );
+    worker.onmessage = (e: MessageEvent<{ type: string; buffer: ArrayBuffer; width: number; height: number }>) => {
+      pendingRef.current = false;
+      if (!runningRef.current) return;
+      const { buffer, width, height } = e.data;
+      onGridRef.current({ width, height, cells: new Uint8Array(buffer) });
+    };
+    workerRef.current = worker;
+    return () => {
+      worker.terminate();
+      workerRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!opts.running) {
+      pendingRef.current = false;
+      return;
+    }
     lastTimeRef.current = performance.now();
     accumulatorRef.current = 0;
+    pendingRef.current = false;
     const tick = (now: number) => {
       const dt = now - lastTimeRef.current;
       lastTimeRef.current = now;
       accumulatorRef.current += dt;
       const tickInterval = 1000 / genPerSecRef.current;
       while (accumulatorRef.current >= tickInterval) {
-        stepRef.current();
+        if (!pendingRef.current && workerRef.current) {
+          pendingRef.current = true;
+          const grid = opts.gridRef.current;
+          const buffer = grid.cells.buffer.slice(0);
+          workerRef.current.postMessage(
+            { type: 'tick', buffer, width: grid.width, height: grid.height },
+            [buffer],
+          );
+        }
         accumulatorRef.current -= tickInterval;
       }
       rafRef.current = requestAnimationFrame(tick);
@@ -88,11 +122,11 @@ export default function Page() {
   const gridRef = useRef(grid);
   gridRef.current = grid;
 
-  const handleTick = useCallback(() => {
-    dispatch({ type: 'tick', next: step(gridRef.current) });
+  const handleGrid = useCallback((next: Grid) => {
+    dispatch({ type: 'tick', next });
   }, []);
 
-  useSimulationLoop({ running, genPerSec, step: handleTick });
+  useSimulationLoop({ running, genPerSec, gridRef, onGrid: handleGrid });
 
   useEffect(() => {
     const canvas = canvasRef.current;

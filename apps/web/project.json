@@ -1,5 +1,17 @@
 {
   "name": "web",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "tags": ["scope:app"]
+  "tags": ["scope:app"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "tsc -p apps/web/tsconfig.json --noEmit",
+          "tsc -p apps/web/app/workers/tsconfig.worker.json --noEmit"
+        ],
+        "parallel": false
+      }
+    }
+  }
 }

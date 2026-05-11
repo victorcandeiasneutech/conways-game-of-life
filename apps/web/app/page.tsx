@@ -1,7 +1,7 @@
 'use client';
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
-import { clearGrid, createGrid, randomizeGrid, step, toggleCell } from '@conways-game-of-life/sim';
-import type { Grid } from '@conways-game-of-life/types';
+import { clearGrid, createGrid, PATTERNS, placePattern, randomizeGrid, step, toggleCell } from '@conways-game-of-life/sim';
+import type { Grid, NamedPattern } from '@conways-game-of-life/types';
 import GridSizeForm from './components/GridSizeForm';
 
 const CELL_PX = 12;
@@ -12,7 +12,8 @@ type Action =
   | { type: 'tick'; next: Grid }
   | { type: 'toggle'; x: number; y: number }
   | { type: 'clear' }
-  | { type: 'randomize' };
+  | { type: 'randomize' }
+  | { type: 'place'; grid: Grid };
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
@@ -26,6 +27,8 @@ function reducer(state: State, action: Action): State {
       return { grid: clearGrid(state.grid), genCount: 0 };
     case 'randomize':
       return { grid: randomizeGrid(state.grid), genCount: 0 };
+    case 'place':
+      return { grid: action.grid, genCount: 0 };
   }
 }
 
@@ -64,6 +67,15 @@ function useSimulationLoop(opts: {
   }, [opts.running]);
 }
 
+function buildPlacedGrid(current: Grid, pattern: NamedPattern): Grid {
+  const w = Math.max(current.width, pattern.width);
+  const h = Math.max(current.height, pattern.height);
+  const base = createGrid(w, h);
+  const anchorX = Math.floor((w - pattern.width) / 2);
+  const anchorY = Math.floor((h - pattern.height) / 2);
+  return placePattern(base, pattern, anchorX, anchorY);
+}
+
 export default function Page() {
   const [{ grid, genCount }, dispatch] = useReducer(reducer, undefined, () => ({
     grid: createGrid(30, 30),
@@ -71,6 +83,7 @@ export default function Page() {
   }));
   const [running, setRunning] = useState(false);
   const [genPerSec, setGenPerSec] = useState(10);
+  const [selectedPatternId, setSelectedPatternId] = useState<string>(PATTERNS[0].id);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gridRef = useRef(grid);
   gridRef.current = grid;
@@ -116,6 +129,13 @@ export default function Page() {
   function handleRandomize() {
     setRunning(false);
     dispatch({ type: 'randomize' });
+  }
+
+  function handlePlacePattern() {
+    const pattern = PATTERNS.find(p => p.id === selectedPatternId);
+    if (!pattern) return;
+    setRunning(false);
+    dispatch({ type: 'place', grid: buildPlacedGrid(grid, pattern) });
   }
 
   function handleCanvasPointerDown(e: React.PointerEvent<HTMLCanvasElement>) {
@@ -182,6 +202,27 @@ export default function Page() {
             aria-valuenow={genPerSec}
             className="w-full accent-cyan-400"
           />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label htmlFor="pattern-select" className="text-sm text-neutral-400">Pattern</label>
+          <div className="flex gap-2">
+            <select
+              id="pattern-select"
+              value={selectedPatternId}
+              onChange={(e) => setSelectedPatternId(e.target.value)}
+              className="flex-1 rounded px-2 py-1.5 text-sm bg-neutral-800 text-white border border-neutral-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+            >
+              {PATTERNS.map(p => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+            <button
+              onClick={handlePlacePattern}
+              className="rounded px-3 py-1.5 text-sm font-medium bg-neutral-700 hover:bg-neutral-600 text-white focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
+            >
+              Place
+            </button>
+          </div>
         </div>
         <GridSizeForm
           currentWidth={grid.width}

@@ -5,6 +5,7 @@
   "targets": {
     "typecheck": {
       "executor": "nx:run-commands",
+      "dependsOn": ["^typecheck"],
       "options": {
         "commands": [
           "tsc -p apps/web/tsconfig.json --noEmit",

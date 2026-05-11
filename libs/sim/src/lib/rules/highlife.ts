@@ -19,8 +19,8 @@ function step(grid: Grid): Grid {
       const alive = cells[y * width + x];
       next[y * width + x] =
         alive === 1
-          ? neighbors === 2 || neighbors === 3 ? 1 : 0  // S23
-          : neighbors === 3 || neighbors === 6 ? 1 : 0;  // B36
+          ? (neighbors === 2 || neighbors === 3 ? 1 : 0)  // S23
+          : (neighbors === 3 || neighbors === 6 ? 1 : 0);  // B36
     }
   }
   return { width, height, cells: next };

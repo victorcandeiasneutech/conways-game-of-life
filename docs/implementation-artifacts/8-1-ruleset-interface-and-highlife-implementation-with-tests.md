@@ -1,6 +1,6 @@
 # Story 8.1: `RuleSet` interface and HighLife implementation with tests
 
-Status: review
+Status: done
 
 ## Story
 
@@ -145,7 +145,8 @@ claude-sonnet-4-6
 - HighLife B36/S23: born on 3 or 6 neighbors, survives on 2 or 3. Survival rules are identical to Conway; only birth differs (adds 6-neighbor case).
 - Divergence test confirms the B6 rule: dead cell with 6 live neighbors is born in HighLife but not in Conway.
 - 2×2 block still-life test: same as Conway because S23 survival rules are identical.
-- 65 sim tests pass total (55 existing Conway/grid/pattern + 10 new HighLife); all 7 affected projects green on lint, typecheck, test.
+- 68 sim tests pass total (55 existing Conway/grid/pattern + 13 new HighLife); all 7 affected projects green on lint, typecheck, test.
+- Code review fixes: added explicit parentheses to nested ternary in `highlife.ts` (matching `conway.ts` style); added tests for live cell dying with 6 neighbors (S23 boundary), immutability, and determinism.
 
 ### File List
 

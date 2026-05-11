@@ -1,6 +1,6 @@
 import { highLifeRules } from './highlife';
 import { conwayRules } from './conway';
-import { createGrid, setCell, getCell } from '../grid';
+import { createGrid, setCell, getCell, cloneGrid } from '../grid';
 
 describe('highLifeRules — identity', () => {
   it('exposes id "highlife" and name "HighLife"', () => {
@@ -94,6 +94,44 @@ describe('highLifeRules vs conwayRules — divergence on 6-neighbor case', () =>
     }
     expect(getCell(highLifeRules.step(g), 2, 2)).toBe(1); // HighLife: B6 fires
     expect(getCell(conwayRules.step(g), 2, 2)).toBe(0);   // Conway: B3 only
+  });
+});
+
+describe('highLifeRules — S23 does NOT include 6 (live cell with 6 neighbors dies)', () => {
+  it('kills a live cell with exactly 6 live neighbors', () => {
+    // center (2,2) is ALIVE; same 6-neighbor setup as the B6 birth test
+    let g = createGrid(5, 5);
+    g = setCell(g, 2, 2, 1); // alive center
+    for (const [x, y] of [[1, 1], [2, 1], [3, 1], [1, 2], [3, 2], [1, 3]] as [number, number][]) {
+      g = setCell(g, x, y, 1);
+    }
+    // alive (2,2) has 6 neighbors → not in S23 → must die
+    expect(getCell(highLifeRules.step(g), 2, 2)).toBe(0);
+  });
+});
+
+describe('highLifeRules — immutability', () => {
+  it('never mutates the input grid', () => {
+    let g = createGrid(5, 5);
+    g = setCell(g, 1, 2, 1);
+    g = setCell(g, 2, 2, 1);
+    g = setCell(g, 3, 2, 1);
+    const snapshot = Array.from(g.cells);
+    highLifeRules.step(g);
+    expect(Array.from(g.cells)).toEqual(snapshot);
+  });
+});
+
+describe('highLifeRules — determinism', () => {
+  it('produces byte-identical output across 100 identical runs', () => {
+    let seed = createGrid(5, 5);
+    seed = setCell(seed, 1, 2, 1);
+    seed = setCell(seed, 2, 2, 1);
+    seed = setCell(seed, 3, 2, 1);
+    const reference = Array.from(highLifeRules.step(cloneGrid(seed)).cells);
+    for (let i = 0; i < 99; i++) {
+      expect(Array.from(highLifeRules.step(cloneGrid(seed)).cells)).toEqual(reference);
+    }
   });
 });
 

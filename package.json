@@ -5,23 +5,37 @@
   "scripts": {},
   "private": true,
   "dependencies": {
+    "@nestjs/common": "^11.1.19",
+    "@nestjs/core": "^11.1.19",
+    "@nestjs/platform-express": "^11.1.19",
+    "axios": "^1.6.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.15.1",
     "next": "~16.1.6",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2"
   },
   "devDependencies": {
     "@babel/core": "^7.14.5",
     "@babel/preset-react": "^7.14.5",
     "@eslint/js": "^9.8.0",
+    "@nestjs/schematics": "^11.0.0",
+    "@nestjs/testing": "^11.1.19",
     "@next/eslint-plugin-next": "^16.1.6",
     "@nx/devkit": "22.7.1",
     "@nx/eslint": "22.7.1",
     "@nx/eslint-plugin": "22.7.1",
     "@nx/jest": "22.7.1",
     "@nx/js": "22.7.1",
+    "@nx/nest": "22.7.1",
     "@nx/next": "22.7.1",
+    "@nx/node": "22.7.1",
     "@nx/playwright": "22.7.1",
     "@nx/react": "22.7.1",
+    "@nx/web": "22.7.1",
+    "@nx/webpack": "22.7.1",
     "@nx/workspace": "22.7.1",
     "@playwright/test": "^1.36.0",
     "@swc-node/register": "~1.11.1",
@@ -55,6 +69,7 @@
     "ts-node": "10.9.1",
     "tslib": "^2.3.0",
     "typescript": "~5.9.2",
-    "typescript-eslint": "^8.40.0"
+    "typescript-eslint": "^8.40.0",
+    "webpack-cli": "^5.1.4"
   }
 }

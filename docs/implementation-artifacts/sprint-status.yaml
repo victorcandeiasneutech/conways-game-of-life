@@ -61,8 +61,8 @@ development_status:
 
   epic-4: in-progress
   4-1-playwright-happy-path-e2e-spec: done
-  4-2-keyboard-reachability-and-accessible-name-audit: review
-  4-3-responsive-verification-at-375px-portrait: backlog
+  4-2-keyboard-reachability-and-accessible-name-audit: done
+  4-3-responsive-verification-at-375px-portrait: review
   4-4-readme-as-thinking-document: backlog
   epic-4-retrospective: optional
 

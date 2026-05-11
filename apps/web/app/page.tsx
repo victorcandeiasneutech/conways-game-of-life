@@ -139,14 +139,14 @@ export default function Page() {
         <div className="flex gap-2">
           <button
             onClick={() => setRunning(r => !r)}
-            className="flex-1 rounded px-3 py-1.5 text-sm font-medium bg-cyan-600 hover:bg-cyan-500 text-white"
+            className="flex-1 rounded px-3 py-1.5 text-sm font-medium bg-cyan-600 hover:bg-cyan-500 text-white focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
           >
             {running ? 'Pause' : 'Play'}
           </button>
           <button
             onClick={handleStepClick}
             disabled={running}
-            className="rounded px-3 py-1.5 text-sm font-medium bg-neutral-700 hover:bg-neutral-600 text-white disabled:opacity-40 disabled:cursor-not-allowed"
+            className="rounded px-3 py-1.5 text-sm font-medium bg-neutral-700 hover:bg-neutral-600 text-white disabled:opacity-40 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
           >
             Step
           </button>
@@ -154,13 +154,13 @@ export default function Page() {
         <div className="flex gap-2">
           <button
             onClick={handleClear}
-            className="flex-1 rounded px-3 py-1.5 text-sm font-medium bg-neutral-700 hover:bg-neutral-600 text-white"
+            className="flex-1 rounded px-3 py-1.5 text-sm font-medium bg-neutral-700 hover:bg-neutral-600 text-white focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
           >
             Clear
           </button>
           <button
             onClick={handleRandomize}
-            className="flex-1 rounded px-3 py-1.5 text-sm font-medium bg-neutral-700 hover:bg-neutral-600 text-white"
+            className="flex-1 rounded px-3 py-1.5 text-sm font-medium bg-neutral-700 hover:bg-neutral-600 text-white focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
           >
             Randomize
           </button>
@@ -177,6 +177,9 @@ export default function Page() {
             value={genPerSec}
             onChange={(e) => setGenPerSec(Number(e.target.value))}
             aria-label="Speed (gen/sec)"
+            aria-valuemin={1}
+            aria-valuemax={60}
+            aria-valuenow={genPerSec}
             className="w-full accent-cyan-400"
           />
         </div>

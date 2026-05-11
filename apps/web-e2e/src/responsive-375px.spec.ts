@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test';
 
+test.use({ viewport: { width: 375, height: 667 }, hasTouch: true });
+
 test('responsive at 375px portrait — no horizontal scroll, controls visible, touch toggles cell', async ({ page }) => {
-  await page.setViewportSize({ width: 375, height: 667 });
   await page.goto('/');
 
   // No horizontal scrollbar

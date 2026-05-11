@@ -32,9 +32,9 @@ so that NFR1 has a real, repeatable verification rather than a one-time manual c
 
 ## Dev Notes
 
-### Viewport override per-test
+### Viewport and touch context via `test.use()`
 
-The playwright config uses desktop devices for all three browser projects. A per-test `page.setViewportSize({ width: 375, height: 667 })` overrides the viewport for that test only — no need to add a mobile project to the config.
+`test.use({ viewport: { width: 375, height: 667 }, hasTouch: true })` at the file level configures the browser context for all tests in the spec — viewport and touch support together. `setViewportSize()` alone doesn't enable touch; `hasTouch: true` is required for `locator.tap()` to work in non-mobile browser projects (Chromium, Firefox, WebKit).
 
 ### Horizontal scroll assertion
 
@@ -63,8 +63,8 @@ claude-sonnet-4-6
 
 ### Completion Notes List
 
-- `page.setViewportSize()` overrides per-test without touching the global playwright config.
-- `locator.tap()` on canvas confirmed to trigger `onPointerDown` — Playwright emits pointer events from touch gestures.
+- `test.use({ viewport, hasTouch: true })` sets both viewport and touch at context level — `setViewportSize()` alone doesn't enable `locator.tap()` (WebKit error: "page does not support tap").
+- `locator.tap()` on canvas triggers `onPointerDown` — Playwright emits pointer events from touch gestures when `hasTouch: true`.
 - scrollWidth assertion checked after page load with default 30×30 grid — 360px canvas < 375px viewport, no overflow.
 
 ### File List

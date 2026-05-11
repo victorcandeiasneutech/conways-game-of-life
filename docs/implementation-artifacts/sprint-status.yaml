@@ -59,12 +59,12 @@ development_status:
   3-5-speed-slider-with-raf-accumulator-mid-run-change-without-restart: done
   epic-3-retrospective: done
 
-  epic-4: in-progress
+  epic-4: done
   4-1-playwright-happy-path-e2e-spec: done
   4-2-keyboard-reachability-and-accessible-name-audit: done
   4-3-responsive-verification-at-375px-portrait: done
-  4-4-readme-as-thinking-document: review
-  epic-4-retrospective: optional
+  4-4-readme-as-thinking-document: done
+  epic-4-retrospective: done
 
   epic-5: backlog
   5-1-pattern-data-and-placepattern-in-libs-sim: backlog

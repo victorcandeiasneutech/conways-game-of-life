@@ -51,16 +51,16 @@ development_status:
   2-4-randomize-with-injectable-rng-and-tests: done
   epic-2-retrospective: done
 
-  epic-3: in-progress
+  epic-3: done
   3-1-page-shell-canvas-size-form-and-responsive-layout: done
   3-2-canvas-render-and-click-tap-to-toggle-cells: done
   3-3-play-pause-step-controls-and-generation-counter: done
   3-4-clear-and-randomize-controls: done
-  3-5-speed-slider-with-raf-accumulator-mid-run-change-without-restart: review
-  epic-3-retrospective: optional
+  3-5-speed-slider-with-raf-accumulator-mid-run-change-without-restart: done
+  epic-3-retrospective: done
 
-  epic-4: backlog
-  4-1-playwright-happy-path-e2e-spec: backlog
+  epic-4: in-progress
+  4-1-playwright-happy-path-e2e-spec: review
   4-2-keyboard-reachability-and-accessible-name-audit: backlog
   4-3-responsive-verification-at-375px-portrait: backlog
   4-4-readme-as-thinking-document: backlog

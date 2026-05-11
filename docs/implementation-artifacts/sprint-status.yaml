@@ -80,8 +80,8 @@ development_status:
   7-1-nestjs-apps-api-with-in-memory-pattern-repository: done
   7-2-libs-api-client-typed-wrapper: done
   7-3-save-and-load-ui-in-the-web-app: done
-  7-4-sqlite-repository-via-prisma-full-stretch-upgrade: review
-  epic-7-retrospective: optional
+  7-4-sqlite-repository-via-prisma-full-stretch-upgrade: done
+  epic-7-retrospective: done
 
   epic-8: backlog
   8-1-ruleset-interface-and-highlife-implementation-with-tests: backlog

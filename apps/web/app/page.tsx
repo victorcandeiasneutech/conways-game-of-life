@@ -1,10 +1,11 @@
 'use client';
-import { useEffect, useReducer, useRef, useState } from 'react';
-import { createGrid, toggleCell } from '@conways-game-of-life/sim';
+import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import { createGrid, step, toggleCell } from '@conways-game-of-life/sim';
 import type { Grid } from '@conways-game-of-life/types';
 import GridSizeForm from './components/GridSizeForm';
 
 const CELL_PX = 12;
+const DEFAULT_GEN_PER_SEC = 10;
 
 type State = { grid: Grid; genCount: number };
 type Action =
@@ -23,6 +24,41 @@ function reducer(state: State, action: Action): State {
   }
 }
 
+function useSimulationLoop(opts: {
+  running: boolean;
+  genPerSec: number;
+  step: () => void;
+}) {
+  const rafRef = useRef<number | null>(null);
+  const lastTimeRef = useRef<number>(0);
+  const accumulatorRef = useRef<number>(0);
+  const genPerSecRef = useRef(opts.genPerSec);
+  genPerSecRef.current = opts.genPerSec;
+  const stepRef = useRef(opts.step);
+  stepRef.current = opts.step;
+
+  useEffect(() => {
+    if (!opts.running) return;
+    lastTimeRef.current = performance.now();
+    accumulatorRef.current = 0;
+    const tick = (now: number) => {
+      const dt = now - lastTimeRef.current;
+      lastTimeRef.current = now;
+      accumulatorRef.current += dt;
+      const tickInterval = 1000 / genPerSecRef.current;
+      while (accumulatorRef.current >= tickInterval) {
+        stepRef.current();
+        accumulatorRef.current -= tickInterval;
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    };
+  }, [opts.running]);
+}
+
 export default function Page() {
   const [{ grid, genCount }, dispatch] = useReducer(reducer, undefined, () => ({
     grid: createGrid(30, 30),
@@ -30,6 +66,14 @@ export default function Page() {
   }));
   const [running, setRunning] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const gridRef = useRef(grid);
+  gridRef.current = grid;
+
+  const handleTick = useCallback(() => {
+    dispatch({ type: 'tick', next: step(gridRef.current) });
+  }, []);
+
+  useSimulationLoop({ running, genPerSec: DEFAULT_GEN_PER_SEC, step: handleTick });
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -53,6 +97,11 @@ export default function Page() {
     dispatch({ type: 'resize', w, h });
   }
 
+  function handleStepClick() {
+    if (running) return;
+    dispatch({ type: 'tick', next: step(grid) });
+  }
+
   function handleCanvasPointerDown(e: React.PointerEvent<HTMLCanvasElement>) {
     if (running) return;
     const rect = e.currentTarget.getBoundingClientRect();
@@ -70,6 +119,21 @@ export default function Page() {
         <div className="flex flex-col gap-1 text-sm text-neutral-400">
           <span>Generation: <span data-testid="gen-count" className="text-white font-mono">{genCount}</span></span>
           <span>Grid: {grid.width} × {grid.height}</span>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setRunning(r => !r)}
+            className="flex-1 rounded px-3 py-1.5 text-sm font-medium bg-cyan-600 hover:bg-cyan-500 text-white"
+          >
+            {running ? 'Pause' : 'Play'}
+          </button>
+          <button
+            onClick={handleStepClick}
+            disabled={running}
+            className="rounded px-3 py-1.5 text-sm font-medium bg-neutral-700 hover:bg-neutral-600 text-white disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            Step
+          </button>
         </div>
         <GridSizeForm
           currentWidth={grid.width}

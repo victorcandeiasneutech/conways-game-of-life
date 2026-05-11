@@ -19,6 +19,9 @@
     "rxjs": "^7.8.2",
     "zod": "^4.4.3"
   },
+  "pnpm": {
+    "onlyBuiltDependencies": ["@prisma/client", "prisma"]
+  },
   "devDependencies": {
     "@babel/core": "^7.14.5",
     "@babel/preset-react": "^7.14.5",

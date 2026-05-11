@@ -1,11 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InMemoryPatternRepository } from './in-memory.repository';
-import type { SavedPattern } from '@conways-game-of-life/types';
-import type { CreatePatternDto } from './dto/create-pattern.dto';
+import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import type { PatternRepository, SavedPattern } from '@conways-game-of-life/types';
+import type { CreatePatternDto } from './dto/create-pattern.dto.js';
+import { PATTERN_REPOSITORY } from './patterns.constants.js';
 
 @Injectable()
 export class PatternsService {
-  constructor(private readonly repo: InMemoryPatternRepository) {}
+  constructor(
+    @Inject(PATTERN_REPOSITORY) private readonly repo: PatternRepository,
+  ) {}
 
   list(): Promise<SavedPattern[]> {
     return this.repo.list();

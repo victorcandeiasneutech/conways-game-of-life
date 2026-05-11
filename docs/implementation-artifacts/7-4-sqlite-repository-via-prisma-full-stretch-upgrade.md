@@ -1,6 +1,6 @@
 # Story 7.4: SQLite repository via Prisma (full-stretch upgrade)
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -28,21 +28,21 @@ so that saved patterns survive server restarts.
 
 ## Tasks / Subtasks
 
-- [ ] Install Prisma at workspace root: `pnpm add -w @prisma/client` and `pnpm add -Dw prisma` (AC: 1)
-- [ ] Create `apps/api/prisma/schema.prisma` with `env("DATABASE_URL")` datasource and `Pattern` model (AC: 1)
-- [ ] Create `apps/api/.env` with `DATABASE_URL=file:../data/patterns.db` (gitignored) (AC: 1)
-- [ ] Create `apps/api/data/.gitkeep`; add `apps/api/data/*.db` and `apps/api/.env` to root `.gitignore` (AC: 1)
-- [ ] Run `pnpm prisma migrate dev --name init --schema apps/api/prisma/schema.prisma` to produce first migration (AC: 1)
-- [ ] Create `apps/api/src/patterns/patterns.constants.ts` with `PATTERN_REPOSITORY` injection token (AC: 2)
-- [ ] Create `apps/api/src/patterns/prisma.service.ts` — `PrismaService extends PrismaClient implements OnModuleInit` (AC: 2)
-- [ ] Create `apps/api/src/patterns/prisma.repository.ts` — `SqlitePatternRepository implements PatternRepository` (AC: 2)
-- [ ] Update `apps/api/src/patterns/patterns.service.ts` — inject via `PATTERN_REPOSITORY` token (AC: 2)
-- [ ] Update `apps/api/src/patterns/patterns.module.ts` — wire `PrismaService`, `SqlitePatternRepository`, and `PATTERN_REPOSITORY` token (AC: 2)
-- [ ] Create `apps/api/src/patterns/prisma.repository.spec.ts` — contract tests against `SqlitePatternRepository` (AC: 3)
-- [ ] Verify `patterns.controller.spec.ts` and `in-memory.repository.spec.ts` still pass unmodified (AC: 3)
-- [ ] Add `DATABASE_URL` override in jest config or `tsconfig.spec.json` for test isolation (AC: 3)
-- [ ] Run `pnpm nx affected -t lint,typecheck,test --base=origin/main` — green (AC: 4)
-- [ ] Update `docs/implementation-artifacts/sprint-status.yaml` — 7-4 → review; 7-3 → done
+- [x] Install Prisma at workspace root: `pnpm add -w @prisma/client` and `pnpm add -Dw prisma` (AC: 1)
+- [x] Create `apps/api/prisma/schema.prisma` with `env("DATABASE_URL")` datasource and `Pattern` model (AC: 1)
+- [x] Create `apps/api/.env` with `DATABASE_URL=file:./data/patterns.db` (gitignored) (AC: 1)
+- [x] Create `apps/api/data/.gitkeep`; add `apps/api/data/*.db` and `apps/api/.env` to root `.gitignore` (AC: 1)
+- [x] Run `DATABASE_URL="file:../data/patterns.db" pnpm prisma migrate dev --name init --schema apps/api/prisma/schema.prisma` to produce first migration (AC: 1)
+- [x] Create `apps/api/src/patterns/patterns.constants.ts` with `PATTERN_REPOSITORY` injection token (AC: 2)
+- [x] Create `apps/api/src/patterns/prisma.service.ts` — `PrismaService extends PrismaClient implements OnModuleInit` (AC: 2)
+- [x] Create `apps/api/src/patterns/prisma.repository.ts` — `SqlitePatternRepository implements PatternRepository` (AC: 2)
+- [x] Update `apps/api/src/patterns/patterns.service.ts` — inject via `PATTERN_REPOSITORY` token (AC: 2)
+- [x] Update `apps/api/src/patterns/patterns.module.ts` — wire `PrismaService`, `SqlitePatternRepository`, and `PATTERN_REPOSITORY` token (AC: 2)
+- [x] Create `apps/api/src/patterns/prisma.repository.spec.ts` — contract tests against `SqlitePatternRepository` (AC: 3)
+- [x] Verify `patterns.controller.spec.ts` and `in-memory.repository.spec.ts` still pass unmodified (AC: 3)
+- [x] Add `DATABASE_URL` override in jest config or `tsconfig.spec.json` for test isolation (AC: 3)
+- [x] Run `pnpm nx affected -t lint,typecheck,test --base=origin/main` — green (AC: 4)
+- [x] Update `docs/implementation-artifacts/sprint-status.yaml` — 7-4 → review; 7-3 → done
 
 ## Dev Notes
 
@@ -356,4 +356,31 @@ claude-sonnet-4-6
 
 ### Completion Notes List
 
+- Prisma 7 (latest) had a breaking change removing `url` from `datasource` in `schema.prisma`; downgraded to Prisma 5 (`5.22.0`) which matches the architecture's documented approach.
+- Migration command requires explicit `DATABASE_URL` env var since Prisma looks for `.env` in the schema directory (`apps/api/prisma/`), not `apps/api/`. Use: `DATABASE_URL="file:../data/patterns.db" pnpm prisma migrate dev --name init --schema apps/api/prisma/schema.prisma` (path is relative to schema dir → produces `apps/api/data/patterns.db`).
+- `PrismaService` reads `process.env['DATABASE_URL']` in its constructor, falling back to `'file:./data/patterns.db'` for local dev without explicit env var.
+- Contract tests use in-memory SQLite (`file::memory:?cache=shared`) by setting `process.env['DATABASE_URL']` at module scope before `new PrismaService()` is called. Table is created via `$executeRawUnsafe` — no migration needed in tests.
+- `PATTERN_REPOSITORY` injection token defined in `patterns.constants.ts`; `PatternsService` now depends on the `PatternRepository` interface, not on `InMemoryPatternRepository`. Module uses `{ provide: PATTERN_REPOSITORY, useExisting: SqlitePatternRepository }` to alias the singleton.
+- `in-memory.repository.ts` and its spec remain unchanged — `InMemoryPatternRepository` is still a valid `PatternRepository` but is no longer wired into the live module.
+- `patterns.controller.spec.ts` unchanged — mocks `PatternsService` wholesale; DI refactor doesn't affect it.
+- CI workflow updated: pnpm version changed from `9.8.0` → `10` to match the lockfile generated by pnpm v10 locally.
+- 13 api tests pass: 5 new (prisma.repository.spec) + 4 in-memory + 4 controller.
+
 ### File List
+
+- `apps/api/prisma/schema.prisma`
+- `apps/api/prisma/migrations/20260511114002_init/migration.sql`
+- `apps/api/.env` (gitignored — not committed)
+- `apps/api/data/.gitkeep`
+- `apps/api/src/patterns/patterns.constants.ts`
+- `apps/api/src/patterns/prisma.service.ts`
+- `apps/api/src/patterns/prisma.repository.ts`
+- `apps/api/src/patterns/prisma.repository.spec.ts`
+- `apps/api/src/patterns/patterns.service.ts`
+- `apps/api/src/patterns/patterns.module.ts`
+- `.gitignore`
+- `.github/workflows/ci.yml`
+- `package.json`
+- `pnpm-lock.yaml`
+- `docs/implementation-artifacts/7-4-sqlite-repository-via-prisma-full-stretch-upgrade.md`
+- `docs/implementation-artifacts/sprint-status.yaml`

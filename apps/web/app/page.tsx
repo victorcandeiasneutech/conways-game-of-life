@@ -1,8 +1,11 @@
 'use client';
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { clearGrid, createGrid, PATTERNS, placePattern, randomizeGrid, step, toggleCell } from '@conways-game-of-life/sim';
-import type { Grid, NamedPattern } from '@conways-game-of-life/types';
+import type { Grid, NamedPattern, SavedPattern } from '@conways-game-of-life/types';
+import { listPatterns, savePattern } from '@conways-game-of-life/api-client';
 import GridSizeForm from './components/GridSizeForm';
+import SavePatternPanel from './components/SavePatternPanel';
+import { extractLiveCells, gridFromSavedPattern } from './lib/grid-from-pattern';
 
 const CELL_PX = 12;
 
@@ -113,6 +116,9 @@ export default function Page() {
   const [running, setRunning] = useState(false);
   const [genPerSec, setGenPerSec] = useState(10);
   const [selectedPatternId, setSelectedPatternId] = useState<string>(PATTERNS[0].id);
+  const [savedPatterns, setSavedPatterns] = useState<SavedPattern[]>([]);
+  const [saveName, setSaveName] = useState('');
+  const [apiError, setApiError] = useState<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gridRef = useRef(grid);
   gridRef.current = grid;
@@ -137,6 +143,11 @@ export default function Page() {
     };
   }, []);
 
+  // Fetch saved patterns on mount (best-effort; fails silently if API is down)
+  useEffect(() => {
+    listPatterns().then(setSavedPatterns).catch(() => undefined);
+  }, []);
+
   // Non-tick renders: send grid to worker for drawing when paused
   useEffect(() => {
     if (running) return;
@@ -151,6 +162,25 @@ export default function Page() {
   }, []);
 
   useSimulationLoop({ running, genPerSec, gridRef, onGrid: handleGrid, workerRef });
+
+  async function handleSave() {
+    setApiError(null);
+    try {
+      const liveCells = extractLiveCells(grid);
+      await savePattern({ name: saveName.trim(), width: grid.width, height: grid.height, liveCells });
+      setSaveName('');
+      const patterns = await listPatterns();
+      setSavedPatterns(patterns);
+    } catch {
+      setApiError('Save failed. Is the API running?');
+    }
+  }
+
+  function handleLoad(pattern: SavedPattern) {
+    setApiError(null);
+    setRunning(false);
+    dispatch({ type: 'place', grid: gridFromSavedPattern(pattern) });
+  }
 
   function handleResize(w: number, h: number) {
     if (running) setRunning(false);
@@ -269,6 +299,14 @@ export default function Page() {
           currentWidth={grid.width}
           currentHeight={grid.height}
           onResize={handleResize}
+        />
+        <SavePatternPanel
+          saveName={saveName}
+          onSaveNameChange={setSaveName}
+          onSave={handleSave}
+          savedPatterns={savedPatterns}
+          onLoad={handleLoad}
+          error={apiError}
         />
       </aside>
       <main className="flex-1 flex items-start justify-center">

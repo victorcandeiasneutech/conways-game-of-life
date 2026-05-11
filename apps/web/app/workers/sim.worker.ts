@@ -1,4 +1,7 @@
-import { step } from '@conways-game-of-life/sim';
+import { conwayRules, highLifeRules } from '@conways-game-of-life/sim';
+import type { Grid } from '@conways-game-of-life/types';
+
+let activeStep: (grid: Grid) => Grid = conwayRules.step;
 
 let ctx: OffscreenCanvasRenderingContext2D | null = null;
 let storedCanvas: OffscreenCanvas | null = null;
@@ -23,7 +26,8 @@ function renderGrid(cells: Uint8Array, width: number, height: number) {
 type WorkerMessage =
   | { type: 'init'; canvas: OffscreenCanvas; cellPx: number }
   | { type: 'tick'; buffer: ArrayBuffer; width: number; height: number }
-  | { type: 'render'; buffer: ArrayBuffer; width: number; height: number };
+  | { type: 'render'; buffer: ArrayBuffer; width: number; height: number }
+  | { type: 'setRuleSet'; id: string };
 
 type WorkerResponse = { type: 'grid'; buffer: ArrayBuffer; width: number; height: number };
 
@@ -35,7 +39,7 @@ self.onmessage = (e: MessageEvent<WorkerMessage>) => {
     ctx = storedCanvas.getContext('2d');
   } else if (msg.type === 'tick') {
     const { buffer, width, height } = msg;
-    const next = step({ width, height, cells: new Uint8Array(buffer) });
+    const next = activeStep({ width, height, cells: new Uint8Array(buffer) });
     renderGrid(next.cells, next.width, next.height);
     const response: WorkerResponse = { type: 'grid', buffer: next.cells.buffer as ArrayBuffer, width: next.width, height: next.height };
     self.postMessage(
@@ -45,5 +49,7 @@ self.onmessage = (e: MessageEvent<WorkerMessage>) => {
   } else if (msg.type === 'render') {
     const { buffer, width, height } = msg;
     renderGrid(new Uint8Array(buffer), width, height);
+  } else if (msg.type === 'setRuleSet') {
+    activeStep = msg.id === 'highlife' ? highLifeRules.step : conwayRules.step;
   }
 };

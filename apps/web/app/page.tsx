@@ -1,6 +1,7 @@
 'use client';
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
-import { clearGrid, createGrid, PATTERNS, placePattern, randomizeGrid, step, toggleCell } from '@conways-game-of-life/sim';
+import { clearGrid, conwayRules, createGrid, highLifeRules, PATTERNS, placePattern, randomizeGrid, toggleCell } from '@conways-game-of-life/sim';
+import type { RuleSet } from '@conways-game-of-life/types';
 import type { Grid, NamedPattern, SavedPattern } from '@conways-game-of-life/types';
 import { listPatterns, savePattern } from '@conways-game-of-life/api-client';
 import GridSizeForm from './components/GridSizeForm';
@@ -8,6 +9,7 @@ import SavePatternPanel from './components/SavePatternPanel';
 import { extractLiveCells, gridFromSavedPattern } from './lib/grid-from-pattern';
 
 const CELL_PX = 12;
+const RULE_SETS: RuleSet[] = [conwayRules, highLifeRules];
 
 type State = { grid: Grid; genCount: number };
 type Action =
@@ -115,6 +117,7 @@ export default function Page() {
   }));
   const [running, setRunning] = useState(false);
   const [genPerSec, setGenPerSec] = useState(10);
+  const [ruleSetId, setRuleSetId] = useState<string>('conway');
   const [selectedPatternId, setSelectedPatternId] = useState<string>(PATTERNS[0].id);
   const [savedPatterns, setSavedPatterns] = useState<SavedPattern[]>([]);
   const [saveName, setSaveName] = useState('');
@@ -147,6 +150,11 @@ export default function Page() {
   useEffect(() => {
     listPatterns().then(setSavedPatterns).catch(() => undefined);
   }, []);
+
+  // Notify worker when rule set changes (no grid/gen reset)
+  useEffect(() => {
+    workerRef.current?.postMessage({ type: 'setRuleSet', id: ruleSetId });
+  }, [ruleSetId]);
 
   // Non-tick renders: send grid to worker for drawing when paused
   useEffect(() => {
@@ -189,7 +197,8 @@ export default function Page() {
 
   function handleStepClick() {
     if (running) return;
-    dispatch({ type: 'tick', next: step(grid) });
+    const activeRule = RULE_SETS.find(r => r.id === ruleSetId) ?? conwayRules;
+    dispatch({ type: 'tick', next: activeRule.step(grid) });
   }
 
   function handleClear() {
@@ -273,6 +282,19 @@ export default function Page() {
             aria-valuenow={genPerSec}
             className="w-full accent-cyan-400"
           />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label htmlFor="rule-set-select" className="text-sm text-neutral-400">Rule Set</label>
+          <select
+            id="rule-set-select"
+            value={ruleSetId}
+            onChange={(e) => setRuleSetId(e.target.value)}
+            className="rounded px-2 py-1.5 text-sm bg-neutral-800 text-white border border-neutral-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+          >
+            {RULE_SETS.map(r => (
+              <option key={r.id} value={r.id}>{r.name}</option>
+            ))}
+          </select>
         </div>
         <div className="flex flex-col gap-1">
           <label htmlFor="pattern-select" className="text-sm text-neutral-400">Pattern</label>
